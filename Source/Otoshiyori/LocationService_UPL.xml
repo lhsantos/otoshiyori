@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root xmlns:android="http://schemas.android.com/apk/res/android">
+  <init>
+    <log text="LocationService additions init"/>
+  </init>
+
+  <proguardAdditions>
+    <insert>
+    </insert>
+  </proguardAdditions>
+
+  <androidManifestUpdates>
+    <addPermission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <addPermission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <addFeature android:name="android.hardware.location.gps" />
+    <addFeature android:name="android.hardware.location.network" />
+  </androidManifestUpdates>
+
+  <gameActivityImportAdditions>
+    <insert>
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+    </insert>
+  </gameActivityImportAdditions>
+
+  <gameActivityOnCreateAdditions>
+    <insert>
+    locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+    locationListener = new Otoshiyori_LocationListener();
+    </insert>
+  </gameActivityOnCreateAdditions>
+
+  <gameActivityOnPauseAdditions>
+    <insert>
+    if (locationManager != null)
+        locationManager.removeUpdates(locationListener);
+    </insert>
+  </gameActivityOnPauseAdditions>
+
+  <gameActivityOnResumeAdditions>
+    <insert>
+    String locationProvider = getLocationProvider();
+    if (locationProvider != null)
+        locationManager.requestLocationUpdates(locationProvider, 500, 5, locationListener);
+    </insert>
+  </gameActivityOnResumeAdditions>
+  
+  <gameActivityClassAdditions>
+    <insert>
+    private LocationManager locationManager;
+    private Otoshiyori_LocationListener locationListener;
+
+    private String getLocationProvider() {
+        final Criteria locationCriteria = new Criteria() {
+            {
+                setHorizontalAccuracy(ACCURACY_HIGH);
+            }
+        };
+        String provider = null;
+        if (locationManager != null) {
+            provider = locationManager.getBestProvider(locationCriteria, true);
+        }
+        return provider;
+    }
+
+    private class Otoshiyori_LocationListener implements LocationListener {
+        public void onLocationChanged(Location location) {
+            Otoshiyori_LocationChanged(location);
+        }
+
+        public void onStatusChanged(String provider, int status, Bundle extras) {}
+
+        public void onProviderEnabled(String provider) {}
+
+        public void onProviderDisabled(String provider) {}
+    }
+
+    native void Otoshiyori_LocationChanged(Location location);
+    </insert>
+  </gameActivityClassAdditions>
+</root>
